@@ -26,7 +26,7 @@ def read_word_dictionary():
     Returns:
         list: List of words in the dictionary.
     """
-    dictionary_path = "WordWarp\\data\\word_dictionary.txt"
+    dictionary_path = "C:\\Users\\ACER\\Desktop\\WordWarp\\data\\word_dictionary.txt"
     with open(dictionary_path, "r") as file:
         return [word.strip() for word in file.readlines()]
 

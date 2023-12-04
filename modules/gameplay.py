@@ -1,9 +1,13 @@
 # modules/gameplay.py
+import random
 from modules.ui import display_menu
-from modules.utils import read_word_dictionary
+
+from utils import get_user_choice
 
 
 def start_game(difficulty):
+    global hints_left
+    hints_left = 3  # Reset hints count for a new game
     print(f"Starting WordWarp game with difficulty: {difficulty}")
 
     while True:
@@ -91,7 +95,7 @@ def display_word_state(target_word, guessed_letters):
 
 
 def read_word_dictionary():
-    dictionary_path = "WordWarp\\data\\word_dictionary.txt"
+    dictionary_path = "C:\\Users\\ACER\\Desktop\\WordWarp\\data\\word_dictionary.txt"
     with open(dictionary_path, "r") as file:
         return [word.strip() for word in file.readlines()]
 

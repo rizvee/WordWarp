@@ -1,0 +1,122 @@
+<!-- templates/game.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordWarp Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5 mb-3">Welcome to WordWarp Game!</h1>
+        <p>Try to guess the word:</p>
+        <div id="word-container" class="mb-3">
+            <!-- Display the word here -->
+        </div>
+        <input type="text" id="user-input" class="form-control mb-3" placeholder="Enter your guess">
+        <button onclick="checkGuess()" class="btn btn-primary">Submit</button>
+        <button onclick="getHint()" class="btn btn-info ml-2">Get Hint</button>
+        <p id="result-message" class="mt-3"></p>
+        <p id="hint-message"></p>
+    </div>
+
+    <script>
+        // Example JavaScript for the game
+        const wordContainer = $('#word-container');
+        const userInput = $('#user-input');
+        const resultMessage = $('#result-message');
+
+        // Load words from the server
+        let words = [];
+        $.ajax({
+            url: '/get_words',  // Flask route to get words
+            method: 'GET',
+            success: function(data) {
+                words = data.words;
+                startGame();
+            },
+            error: function() {
+                console.error('Failed to load words.');
+            }
+        });
+
+        function startGame() {
+            // Choose a random word from the list
+            const randomIndex = Math.floor(Math.random() * words.length);
+            const selectedWord = words[randomIndex];
+
+            // Display the word's letters in the word container with a jQuery animation
+            displayWordWithAnimation(selectedWord);
+        }
+
+        function displayWordWithAnimation(word) {
+            // Clear the container and show each letter with a fade-in effect
+            wordContainer.empty();
+            for (let i = 0; i < word.length; i++) {
+                const letter = word[i];
+                const span = $('<span>').text(letter).hide().appendTo(wordContainer);
+                span.delay(i * 300).fadeIn(500);
+            }
+        }
+
+        function checkGuess() {
+            const userGuess = userInput.val().toLowerCase();
+            const displayedWord = wordContainer.text().replace(/ /g, '');
+
+            if (userGuess === displayedWord) {
+                resultMessage.text('Correct! Well done!');
+            } else {
+                resultMessage.text('Incorrect. Try again!');
+            }
+        }
+       
+        let hintsLeft = 3;  // Number of hints allowed
+
+function getHint() {
+    if (hintsLeft > 0) {
+        const displayedWord = wordContainer.text().replace(/ /g, '');
+        const hiddenLetters = getHiddenLetters(displayedWord);
+
+        // Reveal a random hidden letter
+        const randomIndex = Math.floor(Math.random() * hiddenLetters.length);
+        const revealedLetter = hiddenLetters[randomIndex];
+
+        // Display the hint message
+        const hintMessage = `Hint: One letter of the word is "${revealedLetter.toUpperCase()}".`;
+        $('#hint-message').text(hintMessage);
+
+        // Decrement the hintsLeft count
+        hintsLeft--;
+
+        // Update the UI to reflect the remaining hints
+        updateHintsUI();
+    } else {
+        $('#hint-message').text('No more hints left!');
+    }
+}
+
+function getHiddenLetters(word) {
+    // Return an array of indices of hidden letters (not guessed yet)
+    const hiddenIndices = [];
+    for (let i = 0; i < word.length; i++) {
+        if (word[i] === ' ') continue;  // Skip spaces
+        if (!userGuess.includes(word[i].toLowerCase())) {
+            hiddenIndices.push(i);
+        }
+    }
+    return hiddenIndices.map(index => word[index]);
+}
+
+function updateHintsUI() {
+    // Display the remaining hints count
+    const hintsMessage = `Hints Left: ${hintsLeft}`;
+    $('#hint-message').text(hintsMessage);
+}
+    </script>
+</body>
+</html>
